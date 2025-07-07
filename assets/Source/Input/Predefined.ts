@@ -12,6 +12,7 @@ export enum PredefinedActionId {
     Reload,
     Crouch,
     ControlMode,
+    Enter,
 }
 
 export const predefinedAxes: Record<PredefinedAxisId, { mappings: { keyCode: KeyCode, scale: number }[] }> = {
@@ -34,4 +35,5 @@ export const predefinedActions: Record<PredefinedActionId, { mappings: { keyCode
     [PredefinedActionId.ControlMode]: { mappings: [
         { keyCode: KeyCode.ALT_LEFT },
     ] },
+    [PredefinedActionId.Enter]: { mappings: [{ keyCode: KeyCode.KEY_E }] },
 };

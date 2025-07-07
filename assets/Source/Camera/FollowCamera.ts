@@ -87,7 +87,7 @@ export class FollowCamera extends cc.Component {
         this._rotateVertical(this.initialVerticalRotation);
         
         // 更新相机位置
-        this._updatePosition();
+        // this._updatePosition();
     }
 
     // 每帧更新相机位置
@@ -100,7 +100,7 @@ export class FollowCamera extends cc.Component {
         interopToVec3(this._lookAtPosition, this._lookAtPosition, this.target.worldPosition, deltaTime, 6);
 
         // 更新相机位置
-        this._updatePosition();
+        // this._updatePosition();
     }
 
     // 水平旋转相机(外部调用接口)
