@@ -1,0 +1,99 @@
+{
+  "ver": "2.3.13",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "fc74206c-a359-45c6-bfd4-a961604f011e",
+  "files": [
+    "__original-animation-0.cconb"
+  ],
+  "subMetas": {
+    "846f8": {
+      "importer": "gltf-animation",
+      "uuid": "fc74206c-a359-45c6-bfd4-a961604f011e@846f8",
+      "displayName": "",
+      "id": "846f8",
+      "name": "JumpingUp.animation",
+      "userData": {
+        "gltfIndex": 0,
+        "wrapMode": 1,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 0.23333333432674408
+        },
+        "events": []
+      },
+      "ver": "1.0.17",
+      "imported": true,
+      "files": [
+        ".cconb"
+      ],
+      "subMetas": {}
+    },
+    "fce78": {
+      "importer": "gltf-scene",
+      "uuid": "fc74206c-a359-45c6-bfd4-a961604f011e@fce78",
+      "displayName": "",
+      "id": "fce78",
+      "name": "highPoly_female@JumpingUp.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "animationImportSettings": [
+      {
+        "name": "mixamo.com",
+        "duration": 0.23333333432674408,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "JumpingUp",
+            "from": 0,
+            "to": 0.23333333432674408,
+            "wrapMode": 1,
+            "previousId": "846f8"
+          }
+        ]
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "fc74206c-a359-45c6-bfd4-a961604f011e@fce78"
+      ]
+    }
+  }
+}

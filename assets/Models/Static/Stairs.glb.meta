@@ -1,0 +1,76 @@
+{
+  "ver": "2.3.13",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "8a528411-2d3a-46fe-b9da-fa318c13ff64",
+  "files": [],
+  "subMetas": {
+    "b78d7": {
+      "importer": "gltf-mesh",
+      "uuid": "8a528411-2d3a-46fe-b9da-fa318c13ff64@b78d7",
+      "displayName": "",
+      "id": "b78d7",
+      "name": "Stairs.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 164
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "cd0d0": {
+      "importer": "gltf-scene",
+      "uuid": "8a528411-2d3a-46fe-b9da-fa318c13ff64@cd0d0",
+      "displayName": "",
+      "id": "cd0d0",
+      "name": "Stairs.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "8a528411-2d3a-46fe-b9da-fa318c13ff64@b78d7"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "8a528411-2d3a-46fe-b9da-fa318c13ff64@cd0d0"
+      ]
+    },
+    "promoteSingleRootNode": true
+  }
+}

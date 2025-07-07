@@ -1,0 +1,94 @@
+{
+  "ver": "2.3.13",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "5aa4d840-62f9-4856-b97e-ced9558953c3",
+  "files": [],
+  "subMetas": {
+    "41ac8": {
+      "importer": "gltf-mesh",
+      "uuid": "5aa4d840-62f9-4856-b97e-ced9558953c3@41ac8",
+      "displayName": "",
+      "id": "41ac8",
+      "name": "Cube.001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "e5c15": {
+      "importer": "gltf-material",
+      "uuid": "5aa4d840-62f9-4856-b97e-ced9558953c3@e5c15",
+      "displayName": "",
+      "id": "e5c15",
+      "name": "Wall.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "c6f69": {
+      "importer": "gltf-scene",
+      "uuid": "5aa4d840-62f9-4856-b97e-ced9558953c3@c6f69",
+      "displayName": "",
+      "id": "c6f69",
+      "name": "Wall30x2x1.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "5aa4d840-62f9-4856-b97e-ced9558953c3@41ac8"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "5aa4d840-62f9-4856-b97e-ced9558953c3@e5c15"
+      ],
+      "scenes": [
+        "5aa4d840-62f9-4856-b97e-ced9558953c3@c6f69"
+      ]
+    },
+    "promoteSingleRootNode": true
+  }
+}

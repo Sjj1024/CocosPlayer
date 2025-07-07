@@ -1,0 +1,169 @@
+{
+  "ver": "2.3.13",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558",
+  "files": [],
+  "subMetas": {
+    "1e4c8": {
+      "importer": "gltf-mesh",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@1e4c8",
+      "displayName": "",
+      "id": "1e4c8",
+      "name": "Slope-45deg.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "eeaec": {
+      "importer": "gltf-mesh",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@eeaec",
+      "displayName": "",
+      "id": "eeaec",
+      "name": "Slope-60deg.mesh",
+      "userData": {
+        "gltfIndex": 1,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "13f98": {
+      "importer": "gltf-mesh",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@13f98",
+      "displayName": "",
+      "id": "13f98",
+      "name": "Slope-30deg.mesh",
+      "userData": {
+        "gltfIndex": 2,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f3fe3": {
+      "importer": "gltf-mesh",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@f3fe3",
+      "displayName": "",
+      "id": "f3fe3",
+      "name": "Slope-15deg.mesh",
+      "userData": {
+        "gltfIndex": 3,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "d25ab": {
+      "importer": "gltf-mesh",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@d25ab",
+      "displayName": "",
+      "id": "d25ab",
+      "name": "Slope-75deg.mesh",
+      "userData": {
+        "gltfIndex": 4,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "342dd": {
+      "importer": "gltf-material",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@342dd",
+      "displayName": "",
+      "id": "342dd",
+      "name": "Slope.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "c0cb2": {
+      "importer": "gltf-scene",
+      "uuid": "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@c0cb2",
+      "displayName": "",
+      "id": "c0cb2",
+      "name": "Slopes.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@1e4c8",
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@eeaec",
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@13f98",
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@f3fe3",
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@d25ab"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@342dd"
+      ],
+      "scenes": [
+        "f9a0e0fb-afc4-4bfa-81e6-0f3854272558@c0cb2"
+      ]
+    }
+  }
+}

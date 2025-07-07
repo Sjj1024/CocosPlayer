@@ -1,0 +1,99 @@
+{
+  "ver": "2.3.13",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "3099dccd-c7b8-44a7-a914-8146c118ea27",
+  "files": [
+    "__original-animation-0.cconb"
+  ],
+  "subMetas": {
+    "43075": {
+      "importer": "gltf-animation",
+      "uuid": "3099dccd-c7b8-44a7-a914-8146c118ea27@43075",
+      "displayName": "",
+      "id": "43075",
+      "name": "RightStrafe.animation",
+      "userData": {
+        "gltfIndex": 0,
+        "wrapMode": 2,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 0.6666666865348816
+        },
+        "events": []
+      },
+      "ver": "1.0.17",
+      "imported": true,
+      "files": [
+        ".cconb"
+      ],
+      "subMetas": {}
+    },
+    "5ebcf": {
+      "importer": "gltf-scene",
+      "uuid": "3099dccd-c7b8-44a7-a914-8146c118ea27@5ebcf",
+      "displayName": "",
+      "id": "5ebcf",
+      "name": "highPoly_female@RightStrafe.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "animationImportSettings": [
+      {
+        "name": "mixamo.com",
+        "duration": 0.6666666865348816,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "RightStrafe",
+            "from": 0,
+            "to": 0.6666666865348816,
+            "wrapMode": 2,
+            "previousId": "43075"
+          }
+        ]
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "3099dccd-c7b8-44a7-a914-8146c118ea27@5ebcf"
+      ]
+    }
+  }
+}
