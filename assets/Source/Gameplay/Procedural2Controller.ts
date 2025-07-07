@@ -359,7 +359,8 @@ export class Procedural2Controller extends Component {
     // 执行跳跃
     private _doJump() {
         this._falling = true
-        this._velocityY = 5 // 设置初始跳跃速度
+        // 设置初始跳跃速度
+        this._velocityY = 5
     }
 }
 
