@@ -11,7 +11,6 @@ export enum PredefinedActionId {
     Jump,
     Reload,
     Crouch,
-
     ControlMode,
 }
 
