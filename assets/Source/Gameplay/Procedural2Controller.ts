@@ -35,22 +35,33 @@ export class Procedural2Controller extends Component {
     @property
     public enableSpin = true
 
-    @_decorator.property({ unit: '°/s' })
-    public spinSpeed = 360
+    @property
+    public enableRandomMovement = true
 
+    // 自旋转速度，单位°/s
+    @_decorator.property({ unit: '°/s' })
+    public spinSpeed = 720
+
+    // 移动转向速度，单位°/s
     @_decorator.property({ unit: '°/s' })
     public moveTurnSpeed = 270
 
+    // 移动速度，单位m/s
     @_decorator.property({ unit: 'm/s' })
     public moveSpeed = 6
 
+    // 重力加速度，单位m/s²
     @_decorator.property({ unit: 'm/s²' })
     public gravity = 9.18
 
+    // 跳跃准备时间，单位秒
     @_decorator.property({ unit: 's' })
     public jumpPreparationDuration = 0.0
 
+    // 缓存速度
     private _cacheVelocity = new Vec3()
+
+    // 获取缓存速度
     get velocity() {
         return Vec3.set(
             this._cacheVelocity,
@@ -71,6 +82,7 @@ export class Procedural2Controller extends Component {
     start() {
         // 游戏开始时设置随机方向移动和陀螺旋转
         this._initializeRandomMovement()
+        // 游戏开始时设置自旋转
         this._startSpinning()
     }
 
@@ -113,10 +125,17 @@ export class Procedural2Controller extends Component {
         }
     }
 
+    // 应用自旋转
     private _applySpin(deltaTime: number) {
-        const rotationAmount = this.spinSpeed * deltaTime * this._spinDirection
+        // 计算自旋转角度
+        const rotationAmount = 1390 * deltaTime
+        // 应用自旋转
         this.node.rotate(
-            Quat.fromAxisAngle(new Quat(), Vec3.UNIT_Y, toRadian(rotationAmount)),
+            Quat.fromAxisAngle(
+                new Quat(),
+                Vec3.UNIT_Y,
+                toRadian(rotationAmount)
+            ),
             NodeSpace.WORLD
         )
     }
@@ -213,23 +232,37 @@ export class Procedural2Controller extends Component {
     @injectComponent(CharacterController)
     private _characterController!: CharacterController
 
+    // 是否移动输入
     private _hasMovementInput = false
+    // 垂直速度
     private _velocityY = 0.0
+    // 移动方向
     private _movement = new Vec3()
+    // 是否在空中
     private _falling = false
+    // 可行走表面法线
     private _walkableNormal = new Vec3(Vec3.UNIT_Y)
+    // 上一次碰撞点
     private _lastContact = new Vec3()
+    // 是否自旋转
     private _isSpinning = false
 
+    // 是否准备跳跃
     private _isPreparingJump = false
+    // 跳跃准备计时器，单位秒
     private _jumpPreparationTimer = 0.0
+    // 是否淡化视角
     private _shouldFadeView = true
 
     // 随机移动相关属性
     private _isRandomMoving = false
+    // 随机移动方向
     private _randomMoveDirection = new Vec3()
+    // 随机移动计时器，单位秒
     private _randomMoveTimer = 0
-    private _randomMoveDuration = 5
+    // 随机移动持续时间，单位秒
+    private _randomMoveDuration = 80
+    // 自旋转方向，1为顺时针，-1为逆时针
     private _spinDirection = 1
 
     private get _canJump() {
@@ -240,6 +273,7 @@ export class Procedural2Controller extends Component {
         return !this._isPreparingJump && !this._isRandomMoving
     }
 
+    // 获取视角方向
     private _getViewDirection(out: Vec3) {
         if (!this._shouldFadeView) {
             return Vec3.copy(out, getForward(this.node))
@@ -252,6 +286,7 @@ export class Procedural2Controller extends Component {
         }
     }
 
+    // 朝向视角方向
     private _faceView(deltaTime: number) {
         const viewDir = this._getViewDirection(new Vec3())
         viewDir.y = 0.0
@@ -278,6 +313,7 @@ export class Procedural2Controller extends Component {
         this.node.rotate(q, NodeSpace.WORLD)
     }
 
+    // 转换输入向量
     private _transformInputVector(inputVector: Readonly<Vec3>) {
         const viewDir = this._getViewDirection(new Vec3())
         viewDir.y = 0.0
@@ -293,6 +329,7 @@ export class Procedural2Controller extends Component {
         // 处理碰撞逻辑
     }
 
+    // 更新可行走表面法线
     private _updateWalkableNormal() {
         Vec3.copy(this._walkableNormal, Vec3.UNIT_Y)
         const traceStart = new Vec3(this.node.worldPosition)
@@ -322,6 +359,7 @@ export class Procedural2Controller extends Component {
         )
     }
 
+    // 应用滑动
     private _applySliding(v: Vec3) {
         if (this._falling) {
             return
@@ -334,6 +372,7 @@ export class Procedural2Controller extends Component {
         Vec3.projectOnPlane(v, new Vec3(v), this._walkableNormal)
     }
 
+    // 更新跳跃准备
     private _updateJumpPreparation(deltaTime: number) {
         if (!this._isPreparingJump) {
             return
@@ -345,36 +384,44 @@ export class Procedural2Controller extends Component {
         }
     }
 
+    // 执行跳跃
     private _doJump() {
         this._falling = true
         this._velocityY = 5
     }
 
+    // 初始化随机移动
     private _initializeRandomMovement() {
         // 生成随机角度 (0-360度)
         const randomAngle = Math.random() * 360
         const randomRadian = toRadian(randomAngle)
-        
+
         // 设置随机移动方向
         this._randomMoveDirection = new Vec3(
             Math.sin(randomRadian),
             0,
             Math.cos(randomRadian)
         )
-        
+
         // 启用随机移动
         this._isRandomMoving = true
+        // 重置随机移动计时器
         this._randomMoveTimer = 0
-        this._randomMoveDuration = 3 + Math.random() * 5 // 3-8秒随机移动时间
+        // 设置随机移动持续时间
+        this._randomMoveDuration = 80
     }
 
+    // 开始自旋转
     private _startSpinning() {
         // 启用陀螺旋转
         this._isSpinning = true
-        this._spinDirection = Math.random() > 0.5 ? 1 : -1 // 随机旋转方向
+        // 随机旋转方向
+        this._spinDirection = Math.random() > 0.5 ? 1 : -1
     }
 
+    // 更新随机移动
     private _updateRandomMovement(deltaTime: number) {
+        // 如果不在随机移动状态，则返回
         if (!this._isRandomMoving) {
             return
         }
@@ -390,7 +437,7 @@ export class Procedural2Controller extends Component {
 
         // 应用随机移动
         Vec3.zero(this._movement)
-        
+
         // 使用随机方向进行移动
         Vec3.multiplyScalar(
             this._movement,
@@ -429,12 +476,14 @@ export class Procedural2Controller extends Component {
         }
     }
 
+    // 停止随机移动
     private _stopRandomMovement() {
         this._isRandomMoving = false
         this._isSpinning = false
     }
 }
 
+// 计算两个向量之间的有符号角度
 function signedAngleVec3(
     a: Readonly<Vec3>,
     b: Readonly<Vec3>,
