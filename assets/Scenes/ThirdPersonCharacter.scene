@@ -1143,9 +1143,11 @@
     "enableRandomMovement": true,
     "spinSpeed": 360,
     "moveTurnSpeed": 360,
-    "moveSpeed": 3,
+    "moveSpeed": 10,
     "gravity": 9.18,
     "jumpPreparationDuration": 0,
+    "bounceCoefficient": 0.8,
+    "enableBounce": true,
     "_id": "09t4A847ZHpITM/i9bgS1p"
   },
   {
@@ -1243,7 +1245,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": -14.520000457763672,
+      "x": 0,
       "y": 4.7683715642676816e-8,
       "z": 5.488999843597412
     }

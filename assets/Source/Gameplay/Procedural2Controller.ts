@@ -40,7 +40,7 @@ export class Procedural2Controller extends Component {
 
     // 自旋转速度，单位°/s
     @_decorator.property({ unit: '°/s' })
-    public spinSpeed = 720
+    public spinSpeed = 1020
 
     // 移动转向速度，单位°/s
     @_decorator.property({ unit: '°/s' })
@@ -107,12 +107,16 @@ export class Procedural2Controller extends Component {
     update(deltaTime: number) {
         // 处理随机移动和陀螺旋转
         this._updateRandomMovement(deltaTime)
+        // 应用自旋转
         this._applySpin(deltaTime)
 
         // 处理正常的移动输入（当随机移动结束后）
         if (!this._isRandomMoving) {
             this._applyLocomotionInput(deltaTime)
         }
+
+        // 更新反弹状态
+        this._updateBounce(deltaTime)
 
         // 调试绘制
         if (DEBUG && this.debug && globalShowTraces) {
@@ -128,7 +132,7 @@ export class Procedural2Controller extends Component {
     // 应用自旋转
     private _applySpin(deltaTime: number) {
         // 计算自旋转角度
-        const rotationAmount = 1390 * deltaTime
+        const rotationAmount = 30
         // 应用自旋转
         this.node.rotate(
             Quat.fromAxisAngle(
@@ -265,6 +269,24 @@ export class Procedural2Controller extends Component {
     // 自旋转方向，1为顺时针，-1为逆时针
     private _spinDirection = 1
 
+    // 反弹相关属性
+    // 反弹系数 (0-1)，1表示完全弹性碰撞，0表示完全非弹性碰撞
+    @_decorator.property({ range: [0, 1, 0.1] })
+    public bounceCoefficient = 1
+
+    // 是否启用反弹
+    @_decorator.property
+    public enableBounce = true
+
+    // 当前移动速度向量
+    private _currentVelocity = new Vec3()
+    // 是否正在反弹
+    private _isBouncing = false
+    // 反弹计时器，防止连续反弹
+    private _bounceTimer = 0
+    // 反弹冷却时间，单位秒
+    private _bounceCooldown = 0.1
+
     private get _canJump() {
         return !this._falling && !this._isPreparingJump
     }
@@ -327,6 +349,18 @@ export class Procedural2Controller extends Component {
         contact: physics.CharacterControllerContact
     ) {
         // 处理碰撞逻辑
+        if (!this.enableBounce || this._isBouncing) {
+            return
+        }
+
+        // 检查是否是墙壁碰撞（法线向上分量小于0.7认为是墙壁）
+        const hitNormal = contact.worldNormal
+        if (Math.abs(hitNormal.y) > 0.7) {
+            return // 跳过地面碰撞
+        }
+
+        // 计算反弹
+        this._handleBounce(hitNormal)
     }
 
     // 更新可行走表面法线
@@ -480,6 +514,58 @@ export class Procedural2Controller extends Component {
     private _stopRandomMovement() {
         this._isRandomMoving = false
         this._isSpinning = false
+    }
+
+    // 处理反弹逻辑
+    private _handleBounce(hitNormal: Vec3) {
+        // 设置反弹状态
+        this._isBouncing = true
+        // 重置反弹计时器
+        this._bounceTimer = 0
+
+        // 计算当前移动方向
+        Vec3.copy(this._currentVelocity, this._randomMoveDirection)
+        // 应用移动速度
+        Vec3.multiplyScalar(this._currentVelocity, this._currentVelocity, this.moveSpeed)
+
+        // 计算反弹方向：v' = v - 2(v·n)n
+        const dotProduct = Vec3.dot(this._currentVelocity, hitNormal)
+        // 计算反射方向
+        const reflection = new Vec3()
+        // 计算反射方向
+        Vec3.multiplyScalar(reflection, hitNormal, 2 * dotProduct)
+        // 计算反射方向
+        Vec3.subtract(reflection, this._currentVelocity, reflection)
+
+        // 应用反弹系数
+        Vec3.multiplyScalar(reflection, reflection, this.bounceCoefficient)
+
+        // 更新随机移动方向
+        console.log('reflection', reflection)
+        Vec3.normalize(this._randomMoveDirection, reflection)
+
+        // 调试绘制反弹方向
+        if (DEBUG && this.debug && globalShowTraces) {
+            drawLineOriginDirLen(
+                this.node.worldPosition,
+                this._randomMoveDirection,
+                2,
+                Color.YELLOW
+            )
+        }
+    }
+
+    // 更新反弹状态
+    private _updateBounce(deltaTime: number) {
+        if (!this._isBouncing) {
+            return
+        }
+        this._bounceTimer += deltaTime
+        if (this._bounceTimer >= this._bounceCooldown) {
+            this._isBouncing = false
+        }
+        console.log('this._bounceTimer', this._bounceTimer)
+        console.log('this._bounceCooldown', this._bounceCooldown)
     }
 }
 
