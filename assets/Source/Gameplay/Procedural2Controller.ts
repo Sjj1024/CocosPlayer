@@ -38,6 +38,10 @@ export class Procedural2Controller extends Component {
     @property
     public enableRandomMovement = true
 
+    // 手动控制还是自动移动？
+    @property
+    public manualControl = true
+
     // 自旋转速度，单位°/s
     @_decorator.property({ unit: '°/s' })
     public spinSpeed = 1020
@@ -89,6 +93,7 @@ export class Procedural2Controller extends Component {
     public onJumped = new Event()
 
     protected onEnable(): void {
+        console.log('onEnable--->')
         this._characterController.on(
             'onControllerColliderHit',
             this._onPhysicalCharacterControllerHit,
@@ -105,10 +110,23 @@ export class Procedural2Controller extends Component {
     }
 
     update(deltaTime: number) {
-        // 处理随机移动和陀螺旋转
-        this._updateRandomMovement(deltaTime)
-        // 应用自旋转
-        this._applySpin(deltaTime)
+        if (this.manualControl) {
+            this._applyInput(deltaTime)
+            // 执行角色控制器移动
+            this._characterController.move(this._movement)
+            // 调试模式下绘制移动方向
+            drawLineOriginDirLen(
+                this.node.worldPosition,
+                Vec3.normalize(new Vec3(), this._movement),
+                10,
+                Color.RED
+            )
+        } else {
+            // 处理随机移动和陀螺旋转
+            this._updateRandomMovement(deltaTime)
+            // 应用自旋转
+            // this._applySpin(deltaTime)
+        }
 
         // 处理正常的移动输入（当随机移动结束后）
         if (!this._isRandomMoving) {
@@ -117,16 +135,8 @@ export class Procedural2Controller extends Component {
 
         // 更新反弹状态
         this._updateBounce(deltaTime)
-
-        // 调试绘制
-        if (DEBUG && this.debug && globalShowTraces) {
-            drawLineOriginDirLen(
-                this.node.worldPosition,
-                this._walkableNormal,
-                1,
-                Color.BLUE
-            )
-        }
+        // console.log('this._bounceTimer', this._bounceTimer)
+        // console.log('this._bounceCooldown', this._bounceCooldown)
     }
 
     // 应用自旋转
@@ -148,20 +158,6 @@ export class Procedural2Controller extends Component {
         const { _movement } = this
         Vec3.zero(_movement)
         this._hasMovementInput = false
-
-        // 处理移动输入（无论是否旋转都可以移动）
-        if (this._canMove) {
-            this._applyInput(deltaTime)
-            if (!Vec3.equals(_movement, Vec3.ZERO)) {
-                if (!this._falling) {
-                    this._updateWalkableNormal()
-                    this._applySliding(_movement)
-                }
-            }
-        }
-
-        // 处理跳跃
-        this._applyJumpInput(deltaTime)
 
         if (DEBUG && this.debug && globalShowTraces) {
             drawLineOriginDirLen(
@@ -193,46 +189,6 @@ export class Procedural2Controller extends Component {
         }
     }
 
-    private _applyInput(deltaTime: number) {
-        const forwardInput = globalInputManager.getAxisValue(
-            PredefinedAxisId.MoveForward
-        )
-        const rightInput = globalInputManager.getAxisValue(
-            PredefinedAxisId.MoveRight
-        )
-        const inputVector = new Vec3(-rightInput, 0.0, forwardInput)
-        if (Vec3.equals(inputVector, Vec3.ZERO)) {
-            return
-        }
-
-        this._hasMovementInput = true
-
-        // 如果不旋转或者有移动输入时才朝向视角方向
-        if (!this._isSpinning || !Vec3.equals(inputVector, Vec3.ZERO)) {
-            this._faceView(deltaTime)
-        }
-
-        Vec3.normalize(inputVector, inputVector)
-        this._transformInputVector(inputVector)
-
-        Vec3.multiplyScalar(
-            this._movement,
-            inputVector,
-            this.moveSpeed * deltaTime
-        )
-    }
-
-    private _applyJumpInput(deltaTime: number) {
-        if (!this._canJump) {
-            return
-        }
-        if (globalInputManager.getAction(PredefinedActionId.Jump)) {
-            this._jumpPreparationTimer = 0.0
-            this._isPreparingJump = true
-            this.onJumped.invoke()
-        }
-    }
-
     @injectComponent(CharacterController)
     private _characterController!: CharacterController
 
@@ -244,17 +200,8 @@ export class Procedural2Controller extends Component {
     private _movement = new Vec3()
     // 是否在空中
     private _falling = false
-    // 可行走表面法线
-    private _walkableNormal = new Vec3(Vec3.UNIT_Y)
-    // 上一次碰撞点
-    private _lastContact = new Vec3()
     // 是否自旋转
     private _isSpinning = false
-
-    // 是否准备跳跃
-    private _isPreparingJump = false
-    // 跳跃准备计时器，单位秒
-    private _jumpPreparationTimer = 0.0
     // 是否淡化视角
     private _shouldFadeView = true
 
@@ -265,14 +212,18 @@ export class Procedural2Controller extends Component {
     // 随机移动计时器，单位秒
     private _randomMoveTimer = 0
     // 随机移动持续时间，单位秒
-    private _randomMoveDuration = 80
+    private _randomMoveDuration = 8000
     // 自旋转方向，1为顺时针，-1为逆时针
     private _spinDirection = 1
 
     // 反弹相关属性
     // 反弹系数 (0-1)，1表示完全弹性碰撞，0表示完全非弹性碰撞
     @_decorator.property({ range: [0, 1, 0.1] })
-    public bounceCoefficient = 1
+    public bounceCoefficient = 0.8
+
+    // 添加反弹最小速度阈值
+    @_decorator.property({ tooltip: '反弹后最小速度阈值，避免过小的移动' })
+    public minBounceSpeed = 0.5
 
     // 是否启用反弹
     @_decorator.property
@@ -285,15 +236,7 @@ export class Procedural2Controller extends Component {
     // 反弹计时器，防止连续反弹
     private _bounceTimer = 0
     // 反弹冷却时间，单位秒
-    private _bounceCooldown = 0.1
-
-    private get _canJump() {
-        return !this._falling && !this._isPreparingJump
-    }
-
-    private get _canMove() {
-        return !this._isPreparingJump && !this._isRandomMoving
-    }
+    private _bounceCooldown = 0.001
 
     // 获取视角方向
     private _getViewDirection(out: Vec3) {
@@ -308,46 +251,53 @@ export class Procedural2Controller extends Component {
         }
     }
 
-    // 朝向视角方向
-    private _faceView(deltaTime: number) {
-        const viewDir = this._getViewDirection(new Vec3())
-        viewDir.y = 0.0
-        viewDir.normalize()
-
-        const characterDir = getForward(this.node)
-        characterDir.y = 0.0
-        characterDir.normalize()
-
-        const currentAimAngle = signedAngleVec3(
-            characterDir,
-            viewDir,
-            Vec3.UNIT_Y
-        )
-        const currentAimAngleDegMag = toDegree(Math.abs(currentAimAngle))
-
-        const maxRotDegMag = this.moveTurnSpeed * deltaTime
-        const rotDegMag = Math.min(maxRotDegMag, currentAimAngleDegMag)
-        const q = Quat.fromAxisAngle(
-            new Quat(),
-            Vec3.UNIT_Y,
-            Math.sign(currentAimAngle) * toRadian(rotDegMag)
-        )
-        this.node.rotate(q, NodeSpace.WORLD)
-    }
-
-    // 转换输入向量
+    // 将输入向量转换到世界空间
     private _transformInputVector(inputVector: Readonly<Vec3>) {
+        // 获取视角方向并去除垂直分量
         const viewDir = this._getViewDirection(new Vec3())
         viewDir.y = 0.0
         Vec3.normalize(viewDir, viewDir)
 
+        // 创建从Z轴到视角方向的旋转四元数
         const q = Quat.rotationTo(new Quat(), Vec3.UNIT_Z, viewDir)
+        // 将输入向量应用该旋转
         Vec3.transformQuat(inputVector, inputVector, q)
+    }
+
+    // 处理移动输入
+    private _applyInput(deltaTime: number) {
+        // 获取前后和左右移动的输入值
+        const forwardInput = globalInputManager.getAxisValue(
+            PredefinedAxisId.MoveForward
+        )
+        const rightInput = globalInputManager.getAxisValue(
+            PredefinedAxisId.MoveRight
+        )
+        const inputVector = new Vec3(-rightInput, 0.0, forwardInput)
+
+        // 没有输入时直接返回
+        if (Vec3.equals(inputVector, Vec3.ZERO)) {
+            return
+        }
+
+        this._hasMovementInput = true
+
+        // 标准化输入向量并转换到世界空间
+        Vec3.normalize(inputVector, inputVector)
+        this._transformInputVector(inputVector)
+
+        // 根据速度和帧时间计算移动向量
+        Vec3.multiplyScalar(
+            this._movement,
+            inputVector,
+            this.moveSpeed * deltaTime
+        )
     }
 
     private _onPhysicalCharacterControllerHit(
         contact: physics.CharacterControllerContact
     ) {
+        console.log('发生碰撞--->')
         // 处理碰撞逻辑
         if (!this.enableBounce || this._isBouncing) {
             return
@@ -363,86 +313,25 @@ export class Procedural2Controller extends Component {
         this._handleBounce(hitNormal)
     }
 
-    // 更新可行走表面法线
-    private _updateWalkableNormal() {
-        Vec3.copy(this._walkableNormal, Vec3.UNIT_Y)
-        const traceStart = new Vec3(this.node.worldPosition)
-        const traceDistance = 1
-        const ray = geometry.Ray.set(
-            new geometry.Ray(),
-            traceStart.x,
-            traceStart.y,
-            traceStart.z,
-            0,
-            -1,
-            0
-        )
-        const physicsSystem = physics.PhysicsSystem.instance
-        const hit = physicsSystem.raycastClosest(
-            ray,
-            undefined,
-            traceDistance,
-            false
-        )
-        if (!hit) {
-            return
-        }
-        Vec3.copy(
-            this._walkableNormal,
-            physicsSystem.raycastClosestResult.hitNormal
-        )
-    }
-
-    // 应用滑动
-    private _applySliding(v: Vec3) {
-        if (this._falling) {
-            return
-        }
-
-        if (Vec3.angle(this._walkableNormal, v) > Math.PI / 2) {
-            return
-        }
-
-        Vec3.projectOnPlane(v, new Vec3(v), this._walkableNormal)
-    }
-
-    // 更新跳跃准备
-    private _updateJumpPreparation(deltaTime: number) {
-        if (!this._isPreparingJump) {
-            return
-        }
-        this._jumpPreparationTimer += deltaTime
-        if (this._jumpPreparationTimer >= this.jumpPreparationDuration) {
-            this._isPreparingJump = false
-            this._doJump()
-        }
-    }
-
-    // 执行跳跃
-    private _doJump() {
-        this._falling = true
-        this._velocityY = 5
-    }
-
-    // 初始化随机移动
+    // 初始化随机移动（添加方向有效性检查）
     private _initializeRandomMovement() {
         // 生成随机角度 (0-360度)
         const randomAngle = Math.random() * 360
         const randomRadian = toRadian(randomAngle)
 
-        // 设置随机移动方向
+        // 设置随机移动方向并确保归一化
         this._randomMoveDirection = new Vec3(
             Math.sin(randomRadian),
             0,
             Math.cos(randomRadian)
         )
+        // 确保随机移动方向归一化
+        Vec3.normalize(this._randomMoveDirection, this._randomMoveDirection)
 
         // 启用随机移动
         this._isRandomMoving = true
         // 重置随机移动计时器
         this._randomMoveTimer = 0
-        // 设置随机移动持续时间
-        this._randomMoveDuration = 80
     }
 
     // 开始自旋转
@@ -460,35 +349,40 @@ export class Procedural2Controller extends Component {
             return
         }
 
+        // 检查移动方向是否为零向量
+        if (Vec3.equals(this._randomMoveDirection, Vec3.ZERO)) {
+            console.warn('移动方向为零向量，重新初始化随机移动')
+            this._initializeRandomMovement()
+        }
+
         // 更新随机移动计时器
         this._randomMoveTimer += deltaTime
 
-        // 检查是否应该停止随机移动
-        if (this._randomMoveTimer >= this._randomMoveDuration) {
-            this._stopRandomMovement()
-            return
-        }
-
-        // 应用随机移动
-        Vec3.zero(this._movement)
-
-        // 使用随机方向进行移动
-        Vec3.multiplyScalar(
-            this._movement,
-            this._randomMoveDirection,
-            this.moveSpeed * deltaTime
-        )
+        // 计算移动向量（考虑deltaTime）
+        const movement = new Vec3()
+        Vec3.multiplyScalar(movement, this._randomMoveDirection, this.moveSpeed)
 
         // 应用重力
         this._velocityY += -this.gravity * deltaTime
-        this._movement.y += this._velocityY * deltaTime
+        movement.y += this._velocityY * deltaTime
 
         if (ATTACH_EXTRA_DOWNWARD_MOVEMENT_IF_NOT_IN_AIR && !this._falling) {
-            this._movement.y -= EXTRA_DOWNWARD_MOVEMENT_DISTANCE_IF_NOT_IN_AIR
+            movement.y -= EXTRA_DOWNWARD_MOVEMENT_DISTANCE_IF_NOT_IN_AIR
         }
+        movement.y = 0
 
         // 移动角色
-        this._characterController.move(this._movement)
+        // console.log('movement--->', movement)
+        this._characterController.move(movement)
+
+        // 绘制移动方向
+        // console.log('绘制移动方向--->')
+        drawLineOriginDirLen(
+            this.node.worldPosition,
+            Vec3.normalize(new Vec3(), movement),
+            100,
+            Color.RED
+        )
 
         // 更新地面状态
         const grounded = this._characterController.isGrounded
@@ -498,61 +392,52 @@ export class Procedural2Controller extends Component {
         } else {
             this._falling = true
         }
-
-        // 调试绘制随机移动方向
-        if (DEBUG && this.debug && globalShowTraces) {
-            drawLineOriginDirLen(
-                this.node.worldPosition,
-                Vec3.normalize(new Vec3(), this._movement),
-                1,
-                Color.GREEN
-            )
-        }
-    }
-
-    // 停止随机移动
-    private _stopRandomMovement() {
-        this._isRandomMoving = false
-        this._isSpinning = false
     }
 
     // 处理反弹逻辑
     private _handleBounce(hitNormal: Vec3) {
         // 设置反弹状态
         this._isBouncing = true
-        // 重置反弹计时器
         this._bounceTimer = 0
 
         // 计算当前移动方向
         Vec3.copy(this._currentVelocity, this._randomMoveDirection)
-        // 应用移动速度
-        Vec3.multiplyScalar(this._currentVelocity, this._currentVelocity, this.moveSpeed)
+        Vec3.multiplyScalar(
+            this._currentVelocity,
+            this._currentVelocity,
+            this.moveSpeed
+        )
 
-        // 计算反弹方向：v' = v - 2(v·n)n
+        console.log('碰撞前的移动方向', this._currentVelocity)
+
+        // 计算点积并确保不会出现NaN
         const dotProduct = Vec3.dot(this._currentVelocity, hitNormal)
-        // 计算反射方向
+        if (isNaN(dotProduct)) {
+            console.error('计算点积时出现NaN，使用随机方向替代')
+            this._initializeRandomMovement()
+            return
+        }
+
+        // 计算反射方向：v' = v - 2(v·n)n
         const reflection = new Vec3()
-        // 计算反射方向
         Vec3.multiplyScalar(reflection, hitNormal, 2 * dotProduct)
-        // 计算反射方向
         Vec3.subtract(reflection, this._currentVelocity, reflection)
 
         // 应用反弹系数
         Vec3.multiplyScalar(reflection, reflection, this.bounceCoefficient)
 
-        // 更新随机移动方向
-        console.log('reflection', reflection)
-        Vec3.normalize(this._randomMoveDirection, reflection)
-
-        // 调试绘制反弹方向
-        if (DEBUG && this.debug && globalShowTraces) {
-            drawLineOriginDirLen(
-                this.node.worldPosition,
-                this._randomMoveDirection,
-                2,
-                Color.YELLOW
-            )
+        // 检查反射向量是否有效
+        const reflectionLength = Vec3.len(reflection)
+        if (reflectionLength < this.minBounceSpeed) {
+            // 如果反弹后速度太小，重新生成随机方向
+            console.warn('反弹后速度太小，重新生成随机方向')
+            this._initializeRandomMovement()
+            return
         }
+
+        // 更新随机移动方向（保持归一化）
+        Vec3.normalize(this._randomMoveDirection, reflection)
+        console.log('反弹后的移动方向', this._randomMoveDirection)
     }
 
     // 更新反弹状态
@@ -560,12 +445,14 @@ export class Procedural2Controller extends Component {
         if (!this._isBouncing) {
             return
         }
+        // 更新反弹计时器，单位秒，如果大于反弹冷却时间，则停止反弹
         this._bounceTimer += deltaTime
+        // 如果反弹计时器大于反弹冷却时间，则停止反弹
+        // console.log('this._bounceTimer', this._bounceTimer)
+        // console.log('this._bounceCooldown', this._bounceCooldown)
         if (this._bounceTimer >= this._bounceCooldown) {
             this._isBouncing = false
         }
-        console.log('this._bounceTimer', this._bounceTimer)
-        console.log('this._bounceCooldown', this._bounceCooldown)
     }
 }
 
