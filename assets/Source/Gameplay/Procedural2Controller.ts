@@ -1,221 +1,68 @@
 import {
     _decorator,
-    CharacterController,
-    Color,
     Component,
-    debug,
-    find,
-    geometry,
-    Node,
-    NodeSpace,
-    physics,
-    Quat,
-    toDegree,
-    toRadian,
     Vec3,
+    Quat,
+    input,
+    Input,
+    EventKeyboard,
+    KeyCode,
+    Color,
+    Collider,
+    toRadian,
+    ICollisionEvent,
 } from 'cc'
-import { injectComponent } from '../Utils/Component'
-import { globalInputManager } from '../Input/Input'
-import { PredefinedActionId, PredefinedAxisId } from '../Input/Predefined'
-import { getForward } from '../Utils/Node'
-import { DEBUG } from 'cc/env'
 import { drawLineOriginDirLen } from '../Utils/Debug/DebugDraw'
-import { Event } from '../Utils/Event'
-import { globalShowTraces } from '../Utils/ShowTraceSwitch'
 const { ccclass, property } = _decorator
 
-const ATTACH_EXTRA_DOWNWARD_MOVEMENT_IF_NOT_IN_AIR: boolean = true
-const EXTRA_DOWNWARD_MOVEMENT_DISTANCE_IF_NOT_IN_AIR = 0.1
-
-@ccclass('Procedural2Controller')
-export class Procedural2Controller extends Component {
+@ccclass('SimpleMovementController')
+export class SimpleMovementController extends Component {
+    // 移动速度 (m/s)
     @property
-    public debug = false
+    moveSpeed: number = 5
 
+    // 旋转速度 (度/秒)
     @property
-    public enableSpin = true
+    rotateSpeed: number = 90
 
+    // 跳跃高度
     @property
-    public enableRandomMovement = true
+    jumpHeight: number = 2
 
-    // 手动控制还是自动移动？
+    // 重力加速度
     @property
-    public manualControl = true
+    gravity: number = 9.8
 
-    // 自旋转速度，单位°/s
-    @_decorator.property({ unit: '°/s' })
-    public spinSpeed = 1020
+    // 手动控制
+    @property
+    manualControl: boolean = true
 
-    // 移动转向速度，单位°/s
-    @_decorator.property({ unit: '°/s' })
-    public moveTurnSpeed = 270
-
-    // 移动速度，单位m/s
-    @_decorator.property({ unit: 'm/s' })
-    public moveSpeed = 6
-
-    // 重力加速度，单位m/s²
-    @_decorator.property({ unit: 'm/s²' })
-    public gravity = 9.18
-
-    // 跳跃准备时间，单位秒
-    @_decorator.property({ unit: 's' })
-    public jumpPreparationDuration = 0.0
-
-    // 缓存速度
-    private _cacheVelocity = new Vec3()
-
-    // 获取缓存速度
-    get velocity() {
-        return Vec3.set(
-            this._cacheVelocity,
-            this._characterController.velocity.x,
-            this._velocityY,
-            this._characterController.velocity.z
-        )
+    // 当前垂直速度
+    private _verticalVelocity: number = 0
+    // 是否在地面
+    private _isGrounded: boolean = true
+    // 输入状态
+    private _input = {
+        forward: false,
+        backward: false,
+        left: false,
+        right: false,
+        jump: false,
     }
-
-    get falling() {
-        return this._falling
-    }
-
-    get hasMovementInput() {
-        return this._hasMovementInput
-    }
-
-    start() {
-        // 游戏开始时设置随机方向移动和陀螺旋转
-        this._initializeRandomMovement()
-        // 游戏开始时设置自旋转
-        this._startSpinning()
-    }
-
-    public onJumped = new Event()
-
-    protected onEnable(): void {
-        console.log('onEnable--->')
-        this._characterController.on(
-            'onControllerColliderHit',
-            this._onPhysicalCharacterControllerHit,
-            this
-        )
-    }
-
-    protected onDisable(): void {
-        this._characterController.off(
-            'onControllerColliderHit',
-            this._onPhysicalCharacterControllerHit,
-            this
-        )
-    }
-
-    update(deltaTime: number) {
-        if (this.manualControl) {
-            this._applyInput(deltaTime)
-            // 执行角色控制器移动
-            this._characterController.move(this._movement)
-            // 调试模式下绘制移动方向
-            drawLineOriginDirLen(
-                this.node.worldPosition,
-                Vec3.normalize(new Vec3(), this._movement),
-                10,
-                Color.RED
-            )
-        } else {
-            // 处理随机移动和陀螺旋转
-            this._updateRandomMovement(deltaTime)
-            // 应用自旋转
-            // this._applySpin(deltaTime)
-        }
-
-        // 处理正常的移动输入（当随机移动结束后）
-        if (!this._isRandomMoving) {
-            this._applyLocomotionInput(deltaTime)
-        }
-
-        // 更新反弹状态
-        this._updateBounce(deltaTime)
-        // console.log('this._bounceTimer', this._bounceTimer)
-        // console.log('this._bounceCooldown', this._bounceCooldown)
-    }
-
-    // 应用自旋转
-    private _applySpin(deltaTime: number) {
-        // 计算自旋转角度
-        const rotationAmount = 30
-        // 应用自旋转
-        this.node.rotate(
-            Quat.fromAxisAngle(
-                new Quat(),
-                Vec3.UNIT_Y,
-                toRadian(rotationAmount)
-            ),
-            NodeSpace.WORLD
-        )
-    }
-
-    private _applyLocomotionInput(deltaTime: number) {
-        const { _movement } = this
-        Vec3.zero(_movement)
-        this._hasMovementInput = false
-
-        if (DEBUG && this.debug && globalShowTraces) {
-            drawLineOriginDirLen(
-                this.node.worldPosition,
-                Vec3.normalize(new Vec3(), _movement),
-                1,
-                Color.RED
-            )
-        }
-
-        // 应用重力
-        this._velocityY += -this.gravity * deltaTime
-        _movement.y += this._velocityY * deltaTime
-
-        if (ATTACH_EXTRA_DOWNWARD_MOVEMENT_IF_NOT_IN_AIR && !this._falling) {
-            _movement.y -= EXTRA_DOWNWARD_MOVEMENT_DISTANCE_IF_NOT_IN_AIR
-        }
-
-        // 移动角色
-        this._characterController.move(_movement)
-
-        // 更新地面状态
-        const grounded = this._characterController.isGrounded
-        if (grounded) {
-            this._velocityY = 0.0
-            this._falling = false
-        } else {
-            this._falling = true
-        }
-    }
-
-    @injectComponent(CharacterController)
-    private _characterController!: CharacterController
-
-    // 是否移动输入
-    private _hasMovementInput = false
-    // 垂直速度
-    private _velocityY = 0.0
-    // 移动方向
-    private _movement = new Vec3()
-    // 是否在空中
-    private _falling = false
-    // 是否自旋转
-    private _isSpinning = false
-    // 是否淡化视角
-    private _shouldFadeView = true
-
     // 随机移动相关属性
     private _isRandomMoving = false
     // 随机移动方向
     private _randomMoveDirection = new Vec3()
+    // 当前移动速度向量
+    private _currentVelocity = new Vec3()
+    // 是否正在反弹
+    private _isBouncing = false
+    // 反弹计时器，防止连续反弹
+    private _bounceTimer = 0
+    // 反弹冷却时间，单位秒
+    private _bounceCooldown = 0.001
     // 随机移动计时器，单位秒
     private _randomMoveTimer = 0
-    // 随机移动持续时间，单位秒
-    private _randomMoveDuration = 8000
-    // 自旋转方向，1为顺时针，-1为逆时针
-    private _spinDirection = 1
-
     // 反弹相关属性
     // 反弹系数 (0-1)，1表示完全弹性碰撞，0表示完全非弹性碰撞
     @_decorator.property({ range: [0, 1, 0.1] })
@@ -225,92 +72,51 @@ export class Procedural2Controller extends Component {
     @_decorator.property({ tooltip: '反弹后最小速度阈值，避免过小的移动' })
     public minBounceSpeed = 0.5
 
-    // 是否启用反弹
-    @_decorator.property
-    public enableBounce = true
-
-    // 当前移动速度向量
-    private _currentVelocity = new Vec3()
-    // 是否正在反弹
-    private _isBouncing = false
-    // 反弹计时器，防止连续反弹
-    private _bounceTimer = 0
-    // 反弹冷却时间，单位秒
-    private _bounceCooldown = 0.001
-
-    // 获取视角方向
-    private _getViewDirection(out: Vec3) {
-        if (!this._shouldFadeView) {
-            return Vec3.copy(out, getForward(this.node))
-        }
-        const mainCamera = find('Main Camera')
-        if (!mainCamera) {
-            return Vec3.set(out, 0, 0, -1)
+    start() {
+        // 设置键盘输入监听
+        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this)
+        input.on(Input.EventType.KEY_UP, this.onKeyUp, this)
+        // 设置碰撞监听
+        const colider = this.node.getComponent(Collider)
+        if (colider) {
+            console.log('colider found')
+            colider.on('onCollisionEnter', this.onCollisionEnter, this)
         } else {
-            return Vec3.negate(out, getForward(mainCamera))
+            console.log('colider not found')
+        }
+        // 手动还是自动
+        if (this.manualControl) {
+            console.log('手动控制')
+        } else {
+            this._initializeRandomMovement()
         }
     }
 
-    // 将输入向量转换到世界空间
-    private _transformInputVector(inputVector: Readonly<Vec3>) {
-        // 获取视角方向并去除垂直分量
-        const viewDir = this._getViewDirection(new Vec3())
-        viewDir.y = 0.0
-        Vec3.normalize(viewDir, viewDir)
-
-        // 创建从Z轴到视角方向的旋转四元数
-        const q = Quat.rotationTo(new Quat(), Vec3.UNIT_Z, viewDir)
-        // 将输入向量应用该旋转
-        Vec3.transformQuat(inputVector, inputVector, q)
-    }
-
-    // 处理移动输入
-    private _applyInput(deltaTime: number) {
-        // 获取前后和左右移动的输入值
-        const forwardInput = globalInputManager.getAxisValue(
-            PredefinedAxisId.MoveForward
-        )
-        const rightInput = globalInputManager.getAxisValue(
-            PredefinedAxisId.MoveRight
-        )
-        const inputVector = new Vec3(-rightInput, 0.0, forwardInput)
-
-        // 没有输入时直接返回
-        if (Vec3.equals(inputVector, Vec3.ZERO)) {
-            return
-        }
-
-        this._hasMovementInput = true
-
-        // 标准化输入向量并转换到世界空间
-        Vec3.normalize(inputVector, inputVector)
-        this._transformInputVector(inputVector)
-
-        // 根据速度和帧时间计算移动向量
-        Vec3.multiplyScalar(
-            this._movement,
-            inputVector,
-            this.moveSpeed * deltaTime
-        )
-    }
-
-    private _onPhysicalCharacterControllerHit(
-        contact: physics.CharacterControllerContact
-    ) {
-        console.log('发生碰撞--->')
-        // 处理碰撞逻辑
-        if (!this.enableBounce || this._isBouncing) {
-            return
-        }
-
+    onCollisionEnter(event: ICollisionEvent) {
+        console.log('onCollisionEnter---->', event)
         // 检查是否是墙壁碰撞（法线向上分量小于0.7认为是墙壁）
-        const hitNormal = contact.worldNormal
-        if (Math.abs(hitNormal.y) > 0.7) {
-            return // 跳过地面碰撞
-        }
+        const contacts = event.contacts
+        const worleNormal = new Vec3()
 
-        // 计算反弹
-        this._handleBounce(hitNormal)
+        if (
+            contacts &&
+            contacts.length > 0
+        ) {
+            // 获取第一个接触点的世界法线
+            contacts[0].getWorldNormalOnA(worleNormal)
+            console.log('worleNormal---->', worleNormal)
+            // 检查是否是墙壁碰撞（法线向上分量小于0.7认为是墙壁）
+            const isWall = Math.abs(worleNormal.y) < 0.7
+
+            if (isWall) {
+                console.log('墙壁碰撞，法线方向:', worleNormal)
+                this._handleBounce(worleNormal)
+            } else {
+                console.log('非墙壁碰撞（可能是地面或天花板）')
+            }
+        } else {
+            console.log('没有碰撞')
+        }
     }
 
     // 初始化随机移动（添加方向有效性检查）
@@ -332,66 +138,6 @@ export class Procedural2Controller extends Component {
         this._isRandomMoving = true
         // 重置随机移动计时器
         this._randomMoveTimer = 0
-    }
-
-    // 开始自旋转
-    private _startSpinning() {
-        // 启用陀螺旋转
-        this._isSpinning = true
-        // 随机旋转方向
-        this._spinDirection = Math.random() > 0.5 ? 1 : -1
-    }
-
-    // 更新随机移动
-    private _updateRandomMovement(deltaTime: number) {
-        // 如果不在随机移动状态，则返回
-        if (!this._isRandomMoving) {
-            return
-        }
-
-        // 检查移动方向是否为零向量
-        if (Vec3.equals(this._randomMoveDirection, Vec3.ZERO)) {
-            console.warn('移动方向为零向量，重新初始化随机移动')
-            this._initializeRandomMovement()
-        }
-
-        // 更新随机移动计时器
-        this._randomMoveTimer += deltaTime
-
-        // 计算移动向量（考虑deltaTime）
-        const movement = new Vec3()
-        Vec3.multiplyScalar(movement, this._randomMoveDirection, this.moveSpeed)
-
-        // 应用重力
-        this._velocityY += -this.gravity * deltaTime
-        movement.y += this._velocityY * deltaTime
-
-        if (ATTACH_EXTRA_DOWNWARD_MOVEMENT_IF_NOT_IN_AIR && !this._falling) {
-            movement.y -= EXTRA_DOWNWARD_MOVEMENT_DISTANCE_IF_NOT_IN_AIR
-        }
-        movement.y = 0
-
-        // 移动角色
-        // console.log('movement--->', movement)
-        this._characterController.move(movement)
-
-        // 绘制移动方向
-        // console.log('绘制移动方向--->')
-        drawLineOriginDirLen(
-            this.node.worldPosition,
-            Vec3.normalize(new Vec3(), movement),
-            100,
-            Color.RED
-        )
-
-        // 更新地面状态
-        const grounded = this._characterController.isGrounded
-        if (grounded) {
-            this._velocityY = 0.0
-            this._falling = false
-        } else {
-            this._falling = true
-        }
     }
 
     // 处理反弹逻辑
@@ -440,30 +186,169 @@ export class Procedural2Controller extends Component {
         console.log('反弹后的移动方向', this._randomMoveDirection)
     }
 
-    // 更新反弹状态
-    private _updateBounce(deltaTime: number) {
-        if (!this._isBouncing) {
-            return
+    // 手动控制
+    private _manualControl(deltaTime: number) {
+        // 计算移动方向
+        const moveDirection = new Vec3(0, 0, 0)
+
+        // 前后移动 (基于当前朝向)
+        if (this._input.forward) {
+            const forward = this.node.forward.negative()
+            moveDirection.add(forward)
         }
-        // 更新反弹计时器，单位秒，如果大于反弹冷却时间，则停止反弹
-        this._bounceTimer += deltaTime
-        // 如果反弹计时器大于反弹冷却时间，则停止反弹
-        // console.log('this._bounceTimer', this._bounceTimer)
-        // console.log('this._bounceCooldown', this._bounceCooldown)
-        if (this._bounceTimer >= this._bounceCooldown) {
-            this._isBouncing = false
+        if (this._input.backward) {
+            const backward = this.node.forward
+            moveDirection.add(backward)
+        }
+
+        // 左右移动 (基于当前朝向)
+        if (this._input.left) {
+            const left = this.node.right.negative()
+            moveDirection.add(left)
+        }
+        if (this._input.right) {
+            const right = this.node.right
+            moveDirection.add(right)
+        }
+
+        // 标准化移动方向并应用速度
+        if (!Vec3.equals(moveDirection, Vec3.ZERO)) {
+            Vec3.normalize(moveDirection, moveDirection)
+            moveDirection.multiplyScalar(this.moveSpeed * deltaTime)
+        }
+
+        // 更新位置
+        const newPosition = this.node.getPosition()
+        // 将移动方向和当前位置相加，得到新的位置newPosition
+        Vec3.add(newPosition, newPosition, moveDirection)
+
+        // 简单地面检测
+        if (newPosition.y <= 0) {
+            newPosition.y = 0
+            this._verticalVelocity = 0
+            this._isGrounded = true
+        }
+
+        // 调试模式下绘制移动方向
+        drawLineOriginDirLen(
+            this.node.worldPosition,
+            Vec3.normalize(new Vec3(), moveDirection),
+            10,
+            Color.RED
+        )
+
+        // 将节点位置更新到最新位置
+        this.node.setPosition(newPosition)
+
+        // 旋转控制 (Q/E键)
+        if (this._input.left) {
+            this.node.rotate(
+                Quat.fromAxisAngle(
+                    new Quat(),
+                    Vec3.UP,
+                    ((this.rotateSpeed * Math.PI) / 180) * deltaTime
+                )
+            )
+        }
+        if (this._input.right) {
+            this.node.rotate(
+                Quat.fromAxisAngle(
+                    new Quat(),
+                    Vec3.UP,
+                    ((-this.rotateSpeed * Math.PI) / 180) * deltaTime
+                )
+            )
         }
     }
-}
 
-// 计算两个向量之间的有符号角度
-function signedAngleVec3(
-    a: Readonly<Vec3>,
-    b: Readonly<Vec3>,
-    normal: Readonly<Vec3>
-) {
-    const angle = Vec3.angle(a, b)
-    const cross = Vec3.cross(new Vec3(), a, b)
-    cross.normalize()
-    return Vec3.dot(cross, normal) < 0 ? -angle : angle
+    // 随机控制
+    private _randomControl(deltaTime: number) {
+        // 确保方向向量是归一化的
+        Vec3.normalize(this._randomMoveDirection, this._randomMoveDirection)
+
+        // 计算位移（不修改原方向向量）
+        const displacement = new Vec3(this._randomMoveDirection)
+        displacement.multiplyScalar(this.moveSpeed * deltaTime)
+
+        // 更新世界坐标（避免父节点变换影响）
+        const newPosition = this.node.getPosition()
+        Vec3.add(newPosition, newPosition, displacement)
+        this.node.setPosition(newPosition)
+
+        // 调试模式下绘制移动方向
+        drawLineOriginDirLen(
+            this.node.getPosition(),
+            Vec3.normalize(new Vec3(), displacement),
+            10,
+            Color.RED
+        )
+        // drawLineOriginDirLen(
+        //     this.node.worldPosition,
+        //     Vec3.normalize(new Vec3(), this._randomMoveDirection),
+        //     10,
+        //     Color.RED
+        // )
+        // // 计算位移（不修改原方向向量）
+        // const newPosition = this.node.getPosition()
+        // // 创建一个与随机方向向量相同的新向量（避免修改原方向向量导致原来的方向向量越来越小）
+        // const displacement = new Vec3(this._randomMoveDirection)
+        // // 将位移向量乘以速度和时间，得到位移量
+        // displacement.multiplyScalar(this.moveSpeed * deltaTime)
+        // Vec3.add(newPosition, newPosition, displacement)
+        // console.log('newPosition---->', newPosition)
+        // this.node.setPosition(newPosition)
+
+        // 调试信息
+        // console.log('Random Move Direction:', this._randomMoveDirection)
+        // console.log('Displacement:', displacement)
+        // console.log('New Position:', newPosition)
+    }
+
+    update(deltaTime: number) {
+        if (this.manualControl) {
+            this._manualControl(deltaTime)
+        } else {
+            this._randomControl(deltaTime)
+        }
+    }
+
+    onKeyDown(event: EventKeyboard) {
+        switch (event.keyCode) {
+            case KeyCode.KEY_W:
+                this._input.forward = true
+                break
+            case KeyCode.KEY_S:
+                this._input.backward = true
+                break
+            case KeyCode.KEY_A:
+                this._input.left = true
+                break
+            case KeyCode.KEY_D:
+                this._input.right = true
+                break
+            case KeyCode.SPACE:
+                this._input.jump = true
+                break
+        }
+    }
+
+    onKeyUp(event: EventKeyboard) {
+        switch (event.keyCode) {
+            case KeyCode.KEY_W:
+                this._input.forward = false
+                break
+            case KeyCode.KEY_S:
+                this._input.backward = false
+                break
+            case KeyCode.KEY_A:
+                this._input.left = false
+                break
+            case KeyCode.KEY_D:
+                this._input.right = false
+                break
+            case KeyCode.SPACE:
+                this._input.jump = false
+                break
+        }
+    }
 }
