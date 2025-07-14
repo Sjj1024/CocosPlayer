@@ -11,12 +11,16 @@ import {
     Collider,
     toRadian,
     ICollisionEvent,
+    NodeSpace,
 } from 'cc'
 import { drawLineOriginDirLen } from '../Utils/Debug/DebugDraw'
 const { ccclass, property } = _decorator
 
 @ccclass('SimpleMovementController')
 export class SimpleMovementController extends Component {
+    @property
+    public debug = false
+
     // 移动速度 (m/s)
     @property
     moveSpeed: number = 5
@@ -36,6 +40,11 @@ export class SimpleMovementController extends Component {
     // 手动控制
     @property
     manualControl: boolean = true
+
+    // 是否自旋转
+    private _isSpinning = false
+    // 自旋转方向，1为顺时针，-1为逆时针
+    private _spinDirection = 1
 
     // 当前垂直速度
     private _verticalVelocity: number = 0
@@ -98,10 +107,7 @@ export class SimpleMovementController extends Component {
         const contacts = event.contacts
         const worleNormal = new Vec3()
 
-        if (
-            contacts &&
-            contacts.length > 0
-        ) {
+        if (contacts && contacts.length > 0) {
             // 获取第一个接触点的世界法线
             contacts[0].getWorldNormalOnA(worleNormal)
             console.log('worleNormal---->', worleNormal)
@@ -229,13 +235,15 @@ export class SimpleMovementController extends Component {
             this._isGrounded = true
         }
 
-        // 调试模式下绘制移动方向
-        drawLineOriginDirLen(
-            this.node.worldPosition,
-            Vec3.normalize(new Vec3(), moveDirection),
-            10,
-            Color.RED
-        )
+        if (this.debug) {
+            // 调试模式下绘制移动方向
+            drawLineOriginDirLen(
+                this.node.worldPosition,
+                Vec3.normalize(new Vec3(), moveDirection),
+                10,
+                Color.RED
+            )
+        }
 
         // 将节点位置更新到最新位置
         this.node.setPosition(newPosition)
@@ -261,6 +269,29 @@ export class SimpleMovementController extends Component {
         }
     }
 
+    // 开始自旋转
+    private _startSpinning() {
+        // 启用陀螺旋转
+        this._isSpinning = true
+        // 随机旋转方向
+        this._spinDirection = Math.random() > 0.5 ? 1 : -1
+    }
+
+    // 应用自旋转
+    private _applySpin(deltaTime: number) {
+        // 计算自旋转角度
+        const rotationAmount = 30
+        // 应用自旋转
+        this.node.rotate(
+            Quat.fromAxisAngle(
+                new Quat(),
+                Vec3.UNIT_Y,
+                toRadian(rotationAmount)
+            ),
+            NodeSpace.WORLD
+        )
+    }
+
     // 随机控制
     private _randomControl(deltaTime: number) {
         // 确保方向向量是归一化的
@@ -275,19 +306,16 @@ export class SimpleMovementController extends Component {
         Vec3.add(newPosition, newPosition, displacement)
         this.node.setPosition(newPosition)
 
-        // 调试模式下绘制移动方向
-        drawLineOriginDirLen(
-            this.node.getPosition(),
-            Vec3.normalize(new Vec3(), displacement),
-            10,
-            Color.RED
-        )
-        // drawLineOriginDirLen(
-        //     this.node.worldPosition,
-        //     Vec3.normalize(new Vec3(), this._randomMoveDirection),
-        //     10,
-        //     Color.RED
-        // )
+        if (this.debug) {
+            // 调试模式下绘制移动方向
+            drawLineOriginDirLen(
+                this.node.getPosition(),
+                Vec3.normalize(new Vec3(), displacement),
+                10,
+                Color.RED
+            )
+        }
+
         // // 计算位移（不修改原方向向量）
         // const newPosition = this.node.getPosition()
         // // 创建一个与随机方向向量相同的新向量（避免修改原方向向量导致原来的方向向量越来越小）
@@ -308,6 +336,8 @@ export class SimpleMovementController extends Component {
         if (this.manualControl) {
             this._manualControl(deltaTime)
         } else {
+            // 应用自旋转
+            this._applySpin(deltaTime)
             this._randomControl(deltaTime)
         }
     }
