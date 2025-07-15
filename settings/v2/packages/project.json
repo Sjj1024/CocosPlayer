@@ -1,6 +1,10 @@
 {
   "general": {
-    "highQuality": true
+    "highQuality": true,
+    "designResolution": {
+      "width": 720,
+      "height": 1280
+    }
   },
   "__version__": "1.0.6",
   "fbx": {

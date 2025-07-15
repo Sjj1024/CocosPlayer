@@ -41,6 +41,10 @@ export class SimpleMovementController extends Component {
     @property
     manualControl: boolean = true
 
+    // 计算自旋转角度
+    @property
+    rotationAmount: number = 10
+
     // 是否自旋转
     private _isSpinning = false
     // 自旋转方向，1为顺时针，-1为逆时针
@@ -279,14 +283,12 @@ export class SimpleMovementController extends Component {
 
     // 应用自旋转
     private _applySpin(deltaTime: number) {
-        // 计算自旋转角度
-        const rotationAmount = 30
         // 应用自旋转
         this.node.rotate(
             Quat.fromAxisAngle(
                 new Quat(),
                 Vec3.UNIT_Y,
-                toRadian(rotationAmount)
+                toRadian(this.rotationAmount)
             ),
             NodeSpace.WORLD
         )
