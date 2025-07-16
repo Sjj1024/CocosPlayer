@@ -1,0 +1,143 @@
+{
+  "ver": "2.3.13",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658",
+  "files": [],
+  "subMetas": {
+    "07d75": {
+      "importer": "gltf-mesh",
+      "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658@07d75",
+      "displayName": "",
+      "id": "07d75",
+      "name": "立方体.001.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/Models/hado/运动场-背面.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ce102": {
+      "importer": "gltf-material",
+      "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658@ce102",
+      "displayName": "",
+      "id": "ce102",
+      "name": "材质.003.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "49dfb": {
+      "importer": "gltf-material",
+      "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658@49dfb",
+      "displayName": "",
+      "id": "49dfb",
+      "name": "背景贴.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "8e945": {
+      "importer": "gltf-scene",
+      "uuid": "ca0e7db4-b22a-4818-b576-d8dc20f3d658@8e945",
+      "displayName": "",
+      "id": "8e945",
+      "name": "运动场-背景.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/Models/hado/运动场-背面.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "ca0e7db4-b22a-4818-b576-d8dc20f3d658@07d75"
+      ],
+      "skeletons": [],
+      "textures": [
+        "ca0e7db4-b22a-4818-b576-d8dc20f3d658@7d6ab"
+      ],
+      "materials": [
+        "ca0e7db4-b22a-4818-b576-d8dc20f3d658@ce102",
+        "ca0e7db4-b22a-4818-b576-d8dc20f3d658@49dfb"
+      ],
+      "scenes": [
+        "ca0e7db4-b22a-4818-b576-d8dc20f3d658@8e945"
+      ]
+    }
+  }
+}

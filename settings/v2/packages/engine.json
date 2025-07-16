@@ -51,7 +51,7 @@
         }
       },
       "physics-ammo": {
-        "_value": false,
+        "_value": "physics-ammo",
         "_flags": {
           "physics-ammo": {
             "LOAD_BULLET_MANUALLY": false
@@ -62,7 +62,7 @@
         "_value": false
       },
       "physics-physx": {
-        "_value": false,
+        "_value": "physics-physx",
         "_flags": {
           "physics-physx": {
             "LOAD_PHYSX_MANUALLY": false
@@ -70,7 +70,7 @@
         }
       },
       "physics-builtin": {
-        "_value": false
+        "_value": "physics-builtin"
       },
       "physics-2d": {
         "_value": false,
@@ -180,7 +180,9 @@
         "_value": true
       }
     },
-    "flags": {},
+    "flags": {
+      "LOAD_PHYSX_MANUALLY": false
+    },
     "includeModules": [
       "2d",
       "3d",

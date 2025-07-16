@@ -1,0 +1,160 @@
+{
+  "ver": "2.3.13",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4",
+  "files": [],
+  "subMetas": {
+    "fa0d6": {
+      "importer": "gltf-mesh",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@fa0d6",
+      "displayName": "",
+      "id": "fa0d6",
+      "name": "立方体.003.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 12
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "98e07": {
+      "importer": "gltf-embeded-image",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@98e07",
+      "displayName": "",
+      "id": "98e07",
+      "name": "运动场-红色块.image",
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": true,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".json",
+        ".png"
+      ],
+      "subMetas": {}
+    },
+    "e39f7": {
+      "importer": "texture",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@e39f7",
+      "displayName": "",
+      "id": "e39f7",
+      "name": "UnnamedTexture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "linear",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "b7fa966a-7a1a-498c-83e6-38c9310662b4@98e07"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "dd992": {
+      "importer": "gltf-material",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@dd992",
+      "displayName": "",
+      "id": "dd992",
+      "name": "材质.001.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "84ffe": {
+      "importer": "gltf-material",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@84ffe",
+      "displayName": "",
+      "id": "84ffe",
+      "name": "墙纸.material",
+      "userData": {
+        "gltfIndex": 1
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "bebb6": {
+      "importer": "gltf-scene",
+      "uuid": "b7fa966a-7a1a-498c-83e6-38c9310662b4@bebb6",
+      "displayName": "",
+      "id": "bebb6",
+      "name": "red-test.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "运动场-红色块",
+        "uri": "b7fa966a-7a1a-498c-83e6-38c9310662b4@98e07"
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "assetFinder": {
+      "meshes": [
+        "b7fa966a-7a1a-498c-83e6-38c9310662b4@fa0d6"
+      ],
+      "skeletons": [],
+      "textures": [
+        "b7fa966a-7a1a-498c-83e6-38c9310662b4@e39f7"
+      ],
+      "materials": [
+        "b7fa966a-7a1a-498c-83e6-38c9310662b4@dd992",
+        "b7fa966a-7a1a-498c-83e6-38c9310662b4@84ffe"
+      ],
+      "scenes": [
+        "b7fa966a-7a1a-498c-83e6-38c9310662b4@bebb6"
+      ]
+    }
+  }
+}

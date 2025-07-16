@@ -12,6 +12,7 @@ import {
     toRadian,
     ICollisionEvent,
     NodeSpace,
+    Widget,
 } from 'cc'
 import { drawLineOriginDirLen } from '../Utils/Debug/DebugDraw'
 const { ccclass, property } = _decorator
@@ -44,6 +45,26 @@ export class SimpleMovementController extends Component {
     // 计算自旋转角度
     @property
     rotationAmount: number = 10
+
+    // 礼物类别
+    @property
+    giftCategory: number = 0
+
+    // 加速倍率
+    @property
+    acceleration: number = 1
+
+    // 变大倍率
+    @property
+    scale: number = 1
+
+    // 是否改变方向
+    @property
+    changeDirection: boolean = true
+
+    // 持续时间
+    @property
+    duration: number = 10
 
     // 是否自旋转
     private _isSpinning = false
@@ -92,7 +113,7 @@ export class SimpleMovementController extends Component {
         // 设置碰撞监听
         const colider = this.node.getComponent(Collider)
         if (colider) {
-            console.log('colider found')
+            // console.log('colider found')
             colider.on('onCollisionEnter', this.onCollisionEnter, this)
         } else {
             console.log('colider not found')
@@ -103,10 +124,12 @@ export class SimpleMovementController extends Component {
         } else {
             this._initializeRandomMovement()
         }
+        // 现实玩家昵称
     }
 
+    // 碰撞事件
     onCollisionEnter(event: ICollisionEvent) {
-        console.log('onCollisionEnter---->', event)
+        // console.log('onCollisionEnter---->', event)
         // 检查是否是墙壁碰撞（法线向上分量小于0.7认为是墙壁）
         const contacts = event.contacts
         const worleNormal = new Vec3()
@@ -114,18 +137,18 @@ export class SimpleMovementController extends Component {
         if (contacts && contacts.length > 0) {
             // 获取第一个接触点的世界法线
             contacts[0].getWorldNormalOnA(worleNormal)
-            console.log('worleNormal---->', worleNormal)
+            // console.log('worleNormal---->', worleNormal)
             // 检查是否是墙壁碰撞（法线向上分量小于0.7认为是墙壁）
             const isWall = Math.abs(worleNormal.y) < 0.7
 
             if (isWall) {
-                console.log('墙壁碰撞，法线方向:', worleNormal)
+                // console.log('墙壁碰撞，法线方向:', worleNormal)
                 this._handleBounce(worleNormal)
             } else {
-                console.log('非墙壁碰撞（可能是地面或天花板）')
+                // console.log('非墙壁碰撞（可能是地面或天花板）')
             }
         } else {
-            console.log('没有碰撞')
+            // console.log('没有碰撞')
         }
     }
 
@@ -164,12 +187,12 @@ export class SimpleMovementController extends Component {
             this.moveSpeed
         )
 
-        console.log('碰撞前的移动方向', this._currentVelocity)
+        // console.log('碰撞前的移动方向', this._currentVelocity)
 
         // 计算点积并确保不会出现NaN
         const dotProduct = Vec3.dot(this._currentVelocity, hitNormal)
         if (isNaN(dotProduct)) {
-            console.error('计算点积时出现NaN，使用随机方向替代')
+            // console.error('计算点积时出现NaN，使用随机方向替代')
             this._initializeRandomMovement()
             return
         }
@@ -186,14 +209,14 @@ export class SimpleMovementController extends Component {
         const reflectionLength = Vec3.len(reflection)
         if (reflectionLength < this.minBounceSpeed) {
             // 如果反弹后速度太小，重新生成随机方向
-            console.warn('反弹后速度太小，重新生成随机方向')
+            // console.warn('反弹后速度太小，重新生成随机方向')
             this._initializeRandomMovement()
             return
         }
 
         // 更新随机移动方向（保持归一化）
         Vec3.normalize(this._randomMoveDirection, reflection)
-        console.log('反弹后的移动方向', this._randomMoveDirection)
+        // console.log('反弹后的移动方向', this._randomMoveDirection)
     }
 
     // 手动控制
@@ -342,6 +365,12 @@ export class SimpleMovementController extends Component {
             this._applySpin(deltaTime)
             this._randomControl(deltaTime)
         }
+    }
+
+    // 游戏结束画面
+    GameOver() {
+        // 显示游戏结束画面
+        console.log('游戏结束')
     }
 
     onKeyDown(event: EventKeyboard) {
