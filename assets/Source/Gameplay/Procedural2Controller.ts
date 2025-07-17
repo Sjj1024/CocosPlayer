@@ -12,7 +12,6 @@ import {
     toRadian,
     ICollisionEvent,
     NodeSpace,
-    Widget,
 } from 'cc'
 import { drawLineOriginDirLen } from '../Utils/Debug/DebugDraw'
 const { ccclass, property } = _decorator
@@ -125,6 +124,7 @@ export class SimpleMovementController extends Component {
             this._initializeRandomMovement()
         }
         // 现实玩家昵称
+        // 创建一个2D文本节点作为昵称显示
     }
 
     // 碰撞事件
